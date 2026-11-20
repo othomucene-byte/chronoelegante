@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ChronoElegante</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        .timer {
+            font-size: 4rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+    <div class="text-center">
+        <h1 class="text-2xl font-bold mb-6">ChronoElegante</h1>
+        <div class="timer mb-8" id="timer">00:00:00</div>
+        <div class="flex space-x-4">
+            <button id="startBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <span class="lucide-icon" data-name="play"></span>
+                Iniciar
+            </button>
+            <button id="pauseBtn" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                <span class="lucide-icon" data-name="pause"></span>
+                Pausar
+            </button>
+            <button id="resetBtn" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                <span class="lucide-icon" data-name="refresh-cw"></span>
+                Reiniciar
+            </button>
+        </div>
+        <div class="mt-8">
+            <button id="saveBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                <span class="lucide-icon" data-name="save"></span>
+                Salvar Tempo
+            </button>
+        </div>
+        <div class="mt-4">
+            <h2 class="text-xl font-bold mb-2">Tempos Salvos</h2>
+            <ul id="savedTimes" class="list-disc list-inside">
+                <!-- Tempos salvos aparecerão aqui -->
+            </ul>
+        </div>
+    </div>
+    <script>
+        const timerDisplay = document.getElementById('timer');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const savedTimesList = document.getElementById('savedTimes');
+
+        let startTime = 0;
+        let elapsedTime = 0;
+        let timerInterval;
+        let isRunning = false;
+
+        function updateTimer() {
+            elapsedTime = Date.now() - startTime;
+            const seconds = Math.floor((elapsedTime / 1000) % 60);
+            const minutes = Math.floor((elapsedTime / (1000 * 60)) % 60);
+            const hours = Math.floor((elapsedTime / (1000 * 60 * 60)) % 24);
+            timerDisplay.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            if (!isRunning) {
+                startTime = Date.now() - elapsedTime;
+                timerInterval = setInterval(updateTimer, 10);
+                isRunning = true;
+            }
+        }
+
+        function pauseTimer() {
+            if (isRunning) {
+                clearInterval(timerInterval);
+                isRunning = false;
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            elapsedTime = 0;
+            timerDisplay.textContent = '00:00:00';
+            isRunning = false;
+        }
+
+        function saveTime() {
+            const currentTime = timerDisplay.textContent;
+            const listItem = document.createElement('li');
+            listItem.textContent = currentTime;
+            savedTimesList.appendChild(listItem);
+            const savedTimes = JSON.parse(localStorage.getItem('savedTimes')) || [];
+            savedTimes.push(currentTime);
+            localStorage.setItem('savedTimes', JSON.stringify(savedTimes));
+        }
+
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        resetBtn.addEventListener('click', resetTimer);
+        saveBtn.addEventListener('click', saveTime);
+
+        window.addEventListener('load', () => {
+            const savedTimes = JSON.parse(localStorage.getItem('savedTimes')) || [];
+            savedTimes.forEach(time => {
+                const listItem = document.createElement('li');
+                listItem.textContent = time;
+                savedTimesList.appendChild(listItem);
+            });
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
